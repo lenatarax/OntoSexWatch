@@ -2,45 +2,42 @@ name: PubMed Scraper Workflow
 
 on:
   schedule:
-    # Exécute tous les jours à 18h UTC (18:00)
-    - cron: '0 18 * * *'
+    - cron: '0 18 * * *'  # Exécute tous les jours à 18h UTC
+
+  workflow_dispatch:  # Permet de le lancer manuellement aussi
 
 jobs:
   run_scraper:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Setup Python
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.x'
 
-      # Install required dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Set git identity (to avoid identity error)
-      - name: Set git identity
-        run: |
-          git config --global user.email "lena.somano2@gmail.com"  # Remplace avec ton email
-          git config --global user.name "lenatarax"  # Remplace avec ton nom
-
-      # Run the PubMed scraper
       - name: Run PubMed scraper
         run: python pubmed_scraper.py
 
-      # Archive CSV files into the 'archives' folder and commit the changes
       - name: Archive CSV files
         run: |
-          mkdir -p archives  # Crée le dossier 'archives' s'il n'existe pas
-          mv *.csv archives/  # Déplace les fichiers CSV dans le dossier 'archives'
+          mkdir -p archives  # Crée le dossier s'il n'existe pas
+          mv *.csv archives/  # Déplace les CSV générés
+
+      - name: Commit and push CSV files
+        run: |
           git add archives/
-          git commit -m "Add new CSV files"
+          git commit -m "Automated update: new CSV data"
           git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
