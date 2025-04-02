@@ -2,42 +2,26 @@ name: PubMed Scraper Workflow
 
 on:
   schedule:
-    - cron: '0 18 * * *'  # Exécute tous les jours à 18h UTC
-
-  workflow_dispatch:  # Permet de le lancer manuellement aussi
+    - cron: '0 18 * * *'  # Exécute le script tous les jours à 18h UTC
+  workflow_dispatch:  # Permet un déclenchement manuel du workflow
 
 jobs:
-  run_scraper:
+  scrape_pubmed:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Vérifier le dépôt
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
+      - name: Configurer Python
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.10'  # Version stable de Python
 
-      - name: Install dependencies
+      - name: Installer les dépendances
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run PubMed scraper
-        run: python pubmed_scraper.py
-
-      - name: Archive CSV files
-        run: |
-          mkdir -p archives  # Crée le dossier s'il n'existe pas
-          mv *.csv archives/  # Déplace les CSV générés
-
-      - name: Commit and push CSV files
-        run: |
-          git add archives/
-          git commit -m "Automated update: new CSV data"
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Exécuter le script PubMed Scraper
+        run: python pubmed
