@@ -1,6 +1,14 @@
+name: PubMed Scraper Workflow
+
+on:
+  schedule:
+    # Exécute tous les jours à 18h UTC (18:00)
+    - cron: '0 18 * * *'
+
 jobs:
   run_scraper:
     runs-on: ubuntu-latest
+
     steps:
       # Checkout the repository
       - name: Checkout repository
@@ -18,19 +26,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Set git identity (add this step to avoid the identity error)
+      # Set git identity (to avoid identity error)
       - name: Set git identity
         run: |
-          git config --global user.email "lena.somano2@gmail.com"
-          git config --global user.name "lenatarax"
+          git config --global user.email "lena.somano2@gmail.com"  # Remplace avec ton email
+          git config --global user.name "lenatarax"  # Remplace avec ton nom
 
-      # Run the script to scrape data from PubMed
+      # Run the PubMed scraper
       - name: Run PubMed scraper
         run: python pubmed_scraper.py
 
-      # Archive CSV files (if needed)
+      # Archive CSV files into the 'archives' folder and commit the changes
       - name: Archive CSV files
         run: |
+          mkdir -p archives  # Crée le dossier 'archives' s'il n'existe pas
+          mv *.csv archives/  # Déplace les fichiers CSV dans le dossier 'archives'
           git add archives/
-          git commit -m "Add new CSV file"
+          git commit -m "Add new CSV files"
           git push origin main
