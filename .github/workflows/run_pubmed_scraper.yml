@@ -24,4 +24,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Exécuter le script PubMed Scraper
-        run: python pubmed
+        run: python pubmed_scraper.py
